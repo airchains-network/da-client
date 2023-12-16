@@ -9,7 +9,6 @@ import (
 	"github.com/airchains-network/da-client/types"
 	"github.com/gin-gonic/gin"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -20,7 +19,8 @@ func HomeHandler(c *gin.Context) {
 // Define other handlers here
 
 func CelestiaController(c *gin.Context) {
-
+	rpcAUTH := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.0ohOAkKt_044L7oUXUMtGV27hoTJ0hR1fBH6p6fDhX0"
+	daCelRPC := "http://34.131.171.247/celestia/"
 	var bodyData types.CelestiaData
 
 	if err := c.BindJSON(&bodyData); err != nil {
@@ -35,16 +35,13 @@ func CelestiaController(c *gin.Context) {
 
 	jsonBodyData, err := json.Marshal(bodyData)
 	if err != nil {
-		log.Fatal(err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": " Invalid JSON format",
+		})
 	}
 	encodedData := base64.StdEncoding.EncodeToString(jsonBodyData)
-	fmt.Println(encodedData)
-	//  !Change this to env variable
-	rpcAUTH := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.0ohOAkKt_044L7oUXUMtGV27hoTJ0hR1fBH6p6fDhX0"
-	daCelRPC := "http://34.131.171.247/celestia/"
-
-	//! Data Value For Encording
-	//encodedString := base64.StdEncoding.EncodeToString([]byte(dataValue))
 
 	payload := map[string]interface{}{
 		"id":      1,
@@ -63,7 +60,12 @@ func CelestiaController(c *gin.Context) {
 	//* Marshal the payload struct to JSON
 	payloadJSON, err := json.Marshal(payload)
 	if err != nil {
-		// return false, "Error in Payload JSON"
+		c.JSON(http.StatusBadGateway, gin.H{
+			"status":  502,
+			"success": false,
+			"message": " Error when marshalling payload",
+		})
+
 	}
 
 	//* Create a new HTTP client
@@ -72,7 +74,11 @@ func CelestiaController(c *gin.Context) {
 	//* Create a new POST request with headers and JSON payload
 	req, err := http.NewRequest("POST", daCelRPC, bytes.NewBuffer(payloadJSON))
 	if err != nil {
-		// return false, "Error creating request"
+		c.JSON(http.StatusBadGateway, gin.H{
+			"status":  502,
+			"success": false,
+			"message": " Error when creating new request to Celestia DA",
+		})
 	}
 
 	//! Set request headers
@@ -80,11 +86,23 @@ func CelestiaController(c *gin.Context) {
 	req.Header.Set("Authorization", rpcAUTH)
 	// Send the request
 	response, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": " Error when sending request to Celestia DA",
+		})
+	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		// Handle the error
 		fmt.Println("Error reading body:", err)
+		c.JSON(http.StatusBadGateway, gin.H{
+			"status":  502,
+			"success": false,
+			"message": " Error reading body from Celestia DA",
+		})
 		return
 	}
 
@@ -95,7 +113,11 @@ func CelestiaController(c *gin.Context) {
 	if errorOfOutput != nil {
 		// Handle the error
 		fmt.Println("Error unmarshalling JSON:", errorOfOutput)
-		return
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": " Error unmarshalling JSON from Celestia DA",
+		})
 	}
 
 	if err := json.Unmarshal([]byte(responseJsonCelestia), &celestiaOutput); err == nil {
@@ -103,6 +125,11 @@ func CelestiaController(c *gin.Context) {
 		fmt.Println(celestiaOutput.Result)
 	} else {
 		fmt.Println("Error parsing json Celestia")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  400,
+			"success": false,
+			"message": " Error parsing JSON from Celestia DA",
+		})
 	}
 
 	if err != nil {
