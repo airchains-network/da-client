@@ -7,8 +7,6 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	r.GET("/celestia", controllers.HomeHandler)
-	r.GET("/avail", controllers.HomeHandler)
 	r.POST("/celestia", controllers.CelestiaController)
 	r.POST("/avail", controllers.AvailController)
 
