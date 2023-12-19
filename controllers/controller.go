@@ -183,10 +183,33 @@ func CelestiaController(c *gin.Context) {
 }
 
 func AvailController(c *gin.Context) {
-	daData := "0xa773b843c469f6a81dcf7700404102d66489a4e75419d6f13974df40b025fabe"
-	ok, DaHash := modules.AvailModule(daData)
-	fmt.Println(ok)
-	if ok {
+	var bodyData celestiaTypes.CelestiaData
+	if err := c.BindJSON(&bodyData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":    400,
+			"success":   false,
+			"message":   "Invalid JSON format",
+			"daKeyHash": "nil",
+		})
+		return
+	}
+
+	jsonBodyData, err := json.Marshal(bodyData)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":    400,
+			"success":   false,
+			"message":   " Invalid JSON format",
+			"daKeyHash": "nil",
+		})
+		return
+	}
+
+	encodedData := base64.StdEncoding.EncodeToString(jsonBodyData)
+
+	statusCheck, DaHash := modules.AvailModule(encodedData)
+	fmt.Println(statusCheck)
+	if statusCheck {
 		c.JSON(http.StatusOK, gin.H{
 			"status":    200,
 			"success":   true,
