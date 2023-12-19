@@ -86,7 +86,7 @@ func AvailModule(daData string) (bool, string) {
 
 	defer sub.Unsubscribe()
 
-	timeout := time.After(15 * time.Second)
+	timeout := time.After(20 * time.Second)
 	for {
 		select {
 		case status := <-sub.Chan():
@@ -94,7 +94,7 @@ func AvailModule(daData string) (bool, string) {
 				return true, status.AsInBlock.Hex()
 			}
 		case <-timeout:
-			return false, "timeout of 15 seconds reached without getting finalized status for extrinsic"
+			return false, "timeout of 20 seconds reached without getting finalized status for extrinsic"
 		}
 	}
 
