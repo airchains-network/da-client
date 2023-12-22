@@ -19,6 +19,7 @@ func CelestiaController(c *gin.Context) {
 	daCelRPC := "http://34.131.171.247/celestia/"
 	var bodyData celestiaTypes.CelestiaData
 	if err := c.BindJSON(&bodyData); err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":    400,
 			"success":   false,
@@ -31,6 +32,7 @@ func CelestiaController(c *gin.Context) {
 	jsonBodyData, err := json.Marshal(bodyData)
 
 	if err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":    400,
 			"success":   false,
@@ -58,6 +60,7 @@ func CelestiaController(c *gin.Context) {
 	//* Marshal the payload struct to JSON
 	payloadJSON, err := json.Marshal(payload)
 	if err != nil {
+
 		c.JSON(http.StatusBadGateway, gin.H{
 			"status":    502,
 			"success":   false,
@@ -73,6 +76,7 @@ func CelestiaController(c *gin.Context) {
 	//* Create a new POST request with headers and JSON payload
 	req, err := http.NewRequest("POST", daCelRPC, bytes.NewBuffer(payloadJSON))
 	if err != nil {
+
 		c.JSON(http.StatusBadGateway, gin.H{
 			"status":    502,
 			"success":   false,
@@ -88,6 +92,7 @@ func CelestiaController(c *gin.Context) {
 	// Send the request
 	response, err := client.Do(req)
 	if err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":    400,
 			"success":   false,
@@ -99,7 +104,7 @@ func CelestiaController(c *gin.Context) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		// Handle the error
+
 		fmt.Println("Error reading body:", err)
 		c.JSON(http.StatusBadGateway, gin.H{
 			"status":    502,
@@ -116,6 +121,7 @@ func CelestiaController(c *gin.Context) {
 	err = json.Unmarshal(responseJsonCelestia, &test)
 	fmt.Println(test)
 	if test["error"] != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":    400,
 			"success":   false,
@@ -129,6 +135,7 @@ func CelestiaController(c *gin.Context) {
 	errorOfOutput := json.Unmarshal(responseJsonCelestia, &celestiaOutput)
 	if errorOfOutput != nil {
 		// Handle the error
+
 		fmt.Println("Error unmarshalling JSON:", errorOfOutput)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":    400,
@@ -153,6 +160,7 @@ func CelestiaController(c *gin.Context) {
 	}
 
 	if err != nil {
+
 		// return false, "Error sending request
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":    400,
@@ -166,7 +174,13 @@ func CelestiaController(c *gin.Context) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":    400,
+				"success":   false,
+				"message":   " Data hasn't been submitted to Celestia DA!",
+				"daKeyHash": "nil",
+			})
+			return
 		}
 	}(response.Body)
 
