@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/airchains-network/da-client/models"
 	"github.com/airchains-network/da-client/modules"
-	celestiaTypes "github.com/airchains-network/da-client/types"
+	DaTypes "github.com/airchains-network/da-client/types"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -17,7 +17,7 @@ import (
 func CelestiaController(c *gin.Context) {
 	rpcAUTH := "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJwdWJsaWMiLCJyZWFkIiwid3JpdGUiLCJhZG1pbiJdfQ.0ohOAkKt_044L7oUXUMtGV27hoTJ0hR1fBH6p6fDhX0"
 	daCelRPC := "http://34.131.171.247/celestia/"
-	var bodyData celestiaTypes.CelestiaData
+	var bodyData DaTypes.DAData
 	if err := c.BindJSON(&bodyData); err != nil {
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -197,7 +197,7 @@ func CelestiaController(c *gin.Context) {
 }
 
 func AvailController(c *gin.Context) {
-	var bodyData celestiaTypes.CelestiaData
+	var bodyData DaTypes.DAData
 	if err := c.BindJSON(&bodyData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":    400,

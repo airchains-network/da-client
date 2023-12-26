@@ -26,7 +26,7 @@ type Proof struct {
 	} `json:"CommitmentPok"`
 }
 
-type CelestiaData struct {
+type DAData struct {
 	Proof             Proof    `json:"proof"`
 	TxnHashes         []string `json:"txnHashes"`
 	CurrentStateHash  string   `json:"currentStateHash"`
